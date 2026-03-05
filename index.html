@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0F0D0A" />
-  <meta name="description" content="Prediksi harga rumah menggunakan Machine Learning AI" />
+  <meta name="description" content="Prediksi harga rumah menggunakan Machine Learning - bekerja offline!" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PrediksiRumah" />
@@ -14,1044 +14,366 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0F0D0A;--bg-card:#141210;--bg-el:#1a1714;--border:#2a2520;--borderl:#3a3228;--gold:#C8A97E;--goldl:#E8C99E;--goldd:#A8896E;--tp:#F5EDD9;--ts:#C4B49A;--tm:#8A7A6A;--td:#5A4A3A;--tvd:#3A3028;--pos:#7AC97E;--neg:#C97A7A;--fd:'Playfair Display',Georgia,serif;--fb:'Lora',Georgia,serif}
+    html,body{height:100%;background:var(--bg);color:var(--tp);font-family:var(--fb);overflow:hidden}
+    #app{height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
+    .screen{display:none;flex-direction:column;height:100%;animation:fadeUp .5s ease forwards}
+    .screen.active{display:flex}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    @keyframes shimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
+    @keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-    :root {
-      --bg: #0F0D0A;
-      --bg-card: #141210;
-      --bg-elevated: #1a1714;
-      --border: #2a2520;
-      --border-light: #3a3228;
-      --gold: #C8A97E;
-      --gold-light: #E8C99E;
-      --gold-dim: #A8896E;
-      --text-primary: #F5EDD9;
-      --text-secondary: #C4B49A;
-      --text-muted: #8A7A6A;
-      --text-dim: #5A4A3A;
-      --text-very-dim: #3A3028;
-      --positive: #7AC97E;
-      --negative: #C97A7A;
-      --font-display: 'Playfair Display', Georgia, serif;
-      --font-body: 'Lora', Georgia, serif;
-    }
+    /* INTRO */
+    #screen-intro{align-items:center;justify-content:center;padding:32px 28px;text-align:center;background:radial-gradient(ellipse at 20% 15%,rgba(200,169,126,.07) 0%,transparent 55%),radial-gradient(ellipse at 80% 85%,rgba(200,169,126,.04) 0%,transparent 50%),var(--bg)}
+    .intro-emoji{font-size:72px;animation:float 3s ease-in-out infinite;margin-bottom:24px;display:block}
+    .intro-badge{display:inline-block;border:1px solid var(--borderl);border-radius:20px;padding:5px 16px;font-size:10px;letter-spacing:2.5px;color:var(--gold);margin-bottom:20px;text-transform:uppercase}
+    .intro-title{font-family:var(--fd);font-size:clamp(30px,8vw,40px);font-weight:400;line-height:1.2;margin-bottom:16px}
+    .intro-title span{background:linear-gradient(135deg,var(--gold),var(--goldl),var(--gold));background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s infinite}
+    .intro-sub{color:var(--tm);font-size:15px;line-height:1.75;margin-bottom:24px;max-width:340px}
+    .offline-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(122,201,126,.1);border:1px solid rgba(122,201,126,.25);border-radius:20px;padding:7px 16px;font-size:12px;color:var(--pos);margin-bottom:28px}
+    .offline-dot{width:7px;height:7px;border-radius:50%;background:var(--pos);animation:pulse 2s infinite}
+    .intro-stats{display:flex;gap:28px;margin-bottom:36px;justify-content:center}
+    .stat-item{text-align:center}
+    .stat-icon{font-size:22px;display:block;margin-bottom:6px}
+    .stat-label{font-size:11px;color:var(--td);letter-spacing:.5px}
+    .btn-primary{display:block;width:100%;padding:17px;background:linear-gradient(135deg,var(--gold),var(--goldd));color:var(--bg);border:none;border-radius:6px;font-family:var(--fd);font-size:14px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;transition:transform .2s;margin-bottom:14px}
+    .btn-primary:active{transform:scale(.97)}
+    .intro-note{font-size:12px;color:var(--tvd)}
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text-primary);
-      font-family: var(--font-body);
-      overflow: hidden;
-    }
+    /* CHAT */
+    #screen-chat{overflow:hidden}
+    .chat-header{display:flex;align-items:center;gap:12px;padding:52px 16px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .chat-av{width:36px;height:36px;border-radius:50%;background:var(--bg-el);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .chat-hi{flex:1}
+    .chat-ht{font-size:15px;color:var(--tp);font-family:var(--fd)}
+    .chat-hs{font-size:11px;color:var(--td);margin-top:2px;letter-spacing:.5px}
+    .pdots{display:flex;gap:5px}
+    .pdot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background .3s}
+    .pdot.done{background:var(--gold)}
+    .pdot.active{background:var(--goldl)}
+    .pbar-track{height:2px;background:var(--border);flex-shrink:0}
+    .pbar-fill{height:100%;background:var(--gold);transition:width .5s ease}
+    .msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+    .msgs::-webkit-scrollbar{width:3px}
+    .msgs::-webkit-scrollbar-thumb{background:var(--borderl);border-radius:2px}
+    .msg-row{display:flex;animation:msgIn .35s ease forwards}
+    .msg-row.bot{justify-content:flex-start}
+    .msg-row.user{justify-content:flex-end}
+    .msg-av{width:30px;height:30px;border-radius:50%;background:var(--bg-el);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;margin-right:8px;flex-shrink:0;align-self:flex-end;margin-bottom:2px}
+    .bubble{max-width:75%;border-radius:18px;padding:11px 15px;font-size:14px;line-height:1.6}
+    .bubble.bot{background:var(--bg-el);border:1px solid var(--border);color:var(--ts);border-bottom-left-radius:4px}
+    .bubble.user{background:linear-gradient(135deg,var(--gold),var(--goldd));color:var(--bg);font-weight:600;border-bottom-right-radius:4px}
+    .msg-sub{font-size:11px;color:var(--td);margin-top:5px;font-style:italic}
+    .tdots{display:flex;gap:5px;padding:4px 2px}
+    .tdot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+    .tdot:nth-child(1){animation:bounce 1.2s infinite 0s}
+    .tdot:nth-child(2){animation:bounce 1.2s infinite .2s}
+    .tdot:nth-child(3){animation:bounce 1.2s infinite .4s}
+    .choices-area{flex-shrink:0;border-top:1px solid var(--border);padding:12px 12px 28px;background:var(--bg)}
+    .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .cbtn{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 12px;text-align:left;cursor:pointer;transition:all .2s;color:var(--ts);font-family:var(--fb)}
+    .cbtn:hover,.cbtn:active{border-color:var(--gold);background:var(--bg-el);transform:translateY(-1px)}
+    .cemoji{font-size:20px;display:block;margin-bottom:6px}
+    .clabel{font-size:13px;line-height:1.4}
 
-    #app {
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      max-width: 480px;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    /* ── SCREENS ── */
-    .screen {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      animation: fadeUp 0.5s ease forwards;
-    }
-    .screen.active { display: flex; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes float {
-      0%,100% { transform: translateY(0); }
-      50%      { transform: translateY(-10px); }
-    }
-    @keyframes shimmer {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    @keyframes bounce {
-      0%,80%,100% { transform: translateY(0); }
-      40%          { transform: translateY(-7px); }
-    }
-    @keyframes barFill {
-      from { width: 0%; }
-    }
-    @keyframes msgIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ═══════════════════════════════
-       INTRO SCREEN
-    ═══════════════════════════════ */
-    #screen-intro {
-      align-items: center;
-      justify-content: center;
-      padding: 32px 28px;
-      text-align: center;
-      gap: 0;
-      background:
-        radial-gradient(ellipse at 20% 15%, rgba(200,169,126,0.07) 0%, transparent 55%),
-        radial-gradient(ellipse at 80% 85%, rgba(200,169,126,0.04) 0%, transparent 50%),
-        var(--bg);
-    }
-
-    .intro-emoji {
-      font-size: 72px;
-      animation: float 3s ease-in-out infinite;
-      margin-bottom: 24px;
-      display: block;
-    }
-
-    .intro-badge {
-      display: inline-block;
-      border: 1px solid var(--border-light);
-      border-radius: 20px;
-      padding: 5px 16px;
-      font-size: 10px;
-      letter-spacing: 2.5px;
-      color: var(--gold);
-      margin-bottom: 20px;
-      text-transform: uppercase;
-    }
-
-    .intro-title {
-      font-family: var(--font-display);
-      font-size: clamp(30px, 8vw, 40px);
-      font-weight: 400;
-      line-height: 1.2;
-      margin-bottom: 16px;
-    }
-
-    .intro-title span {
-      background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
-      background-size: 200%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: shimmer 3s infinite;
-    }
-
-    .intro-subtitle {
-      color: var(--text-muted);
-      font-size: 15px;
-      line-height: 1.75;
-      margin-bottom: 36px;
-      max-width: 340px;
-    }
-
-    .intro-stats {
-      display: flex;
-      gap: 32px;
-      margin-bottom: 44px;
-      justify-content: center;
-    }
-
-    .stat-item { text-align: center; }
-    .stat-icon { font-size: 22px; display: block; margin-bottom: 6px; }
-    .stat-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.5px; }
-
-    .btn-primary {
-      display: block;
-      width: 100%;
-      padding: 17px;
-      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-      color: var(--bg);
-      border: none;
-      border-radius: 6px;
-      font-family: var(--font-display);
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      margin-bottom: 16px;
-    }
-    .btn-primary:active { transform: scale(0.97); }
-
-    .intro-note {
-      font-size: 12px;
-      color: var(--text-very-dim);
-      letter-spacing: 0.5px;
-    }
-
-    /* ═══════════════════════════════
-       CHAT SCREEN
-    ═══════════════════════════════ */
-    #screen-chat {
-      overflow: hidden;
-    }
-
-    .chat-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 52px 16px 14px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    .chat-avatar {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-
-    .chat-header-info { flex: 1; }
-    .chat-header-title { font-size: 15px; color: var(--text-primary); font-family: var(--font-display); }
-    .chat-header-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; letter-spacing: 0.5px; }
-
-    .progress-dots {
-      display: flex; gap: 5px;
-    }
-    .progress-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--border);
-      transition: background 0.3s;
-    }
-    .progress-dot.done { background: var(--gold); }
-    .progress-dot.active { background: var(--gold-light); }
-
-    .progress-bar-track {
-      height: 2px;
-      background: var(--border);
-      flex-shrink: 0;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--gold);
-      transition: width 0.5s ease;
-      animation: barFill 0.5s ease;
-    }
-
-    .messages-area {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      scroll-behavior: smooth;
-    }
-    .messages-area::-webkit-scrollbar { width: 3px; }
-    .messages-area::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
-
-    .msg-row {
-      display: flex;
-      animation: msgIn 0.35s ease forwards;
-    }
-    .msg-row.bot { justify-content: flex-start; }
-    .msg-row.user { justify-content: flex-end; }
-
-    .msg-avatar {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px;
-      margin-right: 8px;
-      flex-shrink: 0;
-      align-self: flex-end;
-      margin-bottom: 2px;
-    }
-
-    .msg-bubble {
-      max-width: 75%;
-      border-radius: 18px;
-      padding: 11px 15px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .msg-bubble.bot {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      border-bottom-left-radius: 4px;
-    }
-    .msg-bubble.user {
-      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-      color: var(--bg);
-      font-weight: 600;
-      border-bottom-right-radius: 4px;
-    }
-    .msg-subtitle {
-      font-size: 11px;
-      color: var(--text-dim);
-      margin-top: 5px;
-      font-style: italic;
-    }
-
-    /* Typing indicator */
-    .typing-dots {
-      display: flex; gap: 5px;
-      padding: 4px 2px;
-    }
-    .typing-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--gold);
-    }
-    .typing-dot:nth-child(1) { animation: bounce 1.2s infinite 0s; }
-    .typing-dot:nth-child(2) { animation: bounce 1.2s infinite 0.2s; }
-    .typing-dot:nth-child(3) { animation: bounce 1.2s infinite 0.4s; }
-
-    /* Choice buttons */
-    .choices-area {
-      flex-shrink: 0;
-      border-top: 1px solid var(--border);
-      padding: 12px 12px 28px;
-      background: var(--bg);
-    }
-    .choices-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .choice-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 12px;
-      text-align: left;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: var(--text-secondary);
-      font-family: var(--font-body);
-    }
-    .choice-btn:hover, .choice-btn:active {
-      border-color: var(--gold);
-      background: var(--bg-elevated);
-      transform: translateY(-1px);
-    }
-    .choice-emoji { font-size: 20px; display: block; margin-bottom: 6px; }
-    .choice-label { font-size: 13px; line-height: 1.4; }
-
-    /* ═══════════════════════════════
-       RESULT SCREEN
-    ═══════════════════════════════ */
-    #screen-result {
-      overflow-y: auto;
-    }
-    #screen-result::-webkit-scrollbar { width: 3px; }
-    #screen-result::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
-
-    .result-content {
-      padding: 52px 20px 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .result-header {
-      text-align: center;
-      margin-bottom: 6px;
-    }
-    .result-header-label {
-      font-size: 10px;
-      letter-spacing: 3px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .result-header-title {
-      font-family: var(--font-display);
-      font-size: 22px;
-      font-weight: 400;
-      color: var(--text-primary);
-    }
-
-    .price-card {
-      background: linear-gradient(135deg, #1a1510, #0F0D0A);
-      border: 1px solid var(--border-light);
-      border-radius: 16px;
-      padding: 28px 24px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .price-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        45deg, rgba(200,169,126,0.03) 0px, rgba(200,169,126,0.03) 1px,
-        transparent 1px, transparent 20px
-      );
-    }
-
-    .price-tag {
-      font-size: 10px;
-      letter-spacing: 3px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .price-value {
-      font-family: var(--font-display);
-      font-size: clamp(32px, 9vw, 42px);
-      font-weight: 400;
-      background: linear-gradient(135deg, var(--gold), var(--gold-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 8px;
-      line-height: 1.1;
-    }
-    .price-range {
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-bottom: 20px;
-    }
-    .confidence-section {
-      border-top: 1px solid var(--border);
-      padding-top: 14px;
-    }
-    .confidence-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      margin-bottom: 8px;
-    }
-    .confidence-label { color: var(--text-dim); }
-    .confidence-val { color: var(--gold); font-weight: 600; }
-    .confidence-track {
-      height: 5px;
-      background: var(--border);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .confidence-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--gold), var(--gold-light));
-      border-radius: 3px;
-      width: 0%;
-      transition: width 1.2s ease 0.3s;
-    }
-
-    .result-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 20px;
-    }
-    .card-label {
-      font-size: 10px;
-      letter-spacing: 3px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-      display: block;
-    }
-    .summary-text {
-      font-size: 14px;
-      line-height: 1.8;
-      color: var(--text-secondary);
-    }
-
-    .factor-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-    .factor-row:last-child { margin-bottom: 0; }
-    .factor-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      margin-top: 5px;
-    }
-    .factor-dot.pos { background: var(--positive); }
-    .factor-dot.neg { background: var(--negative); }
-    .factor-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 3px;
-    }
-    .factor-badge {
-      display: inline-block;
-      font-size: 10px;
-      padding: 2px 7px;
-      border-radius: 4px;
-      margin-left: 8px;
-      font-weight: 600;
-      vertical-align: middle;
-    }
-    .factor-badge.pos { background: rgba(122,201,126,0.12); color: var(--positive); }
-    .factor-badge.neg { background: rgba(201,122,122,0.12); color: var(--negative); }
-    .factor-desc {
-      font-size: 12px;
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-
-    .recommend-card {
-      border-color: var(--border-light);
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-    }
-    .recommend-icon { font-size: 20px; flex-shrink: 0; }
-    .recommend-text { font-size: 14px; line-height: 1.75; color: var(--text-secondary); }
-
-    .disclaimer {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-very-dim);
-      line-height: 1.7;
-      padding: 0 8px;
-    }
-
-    .btn-outline {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      background: transparent;
-      color: var(--gold);
-      border: 1px solid var(--border-light);
-      border-radius: 6px;
-      font-family: var(--font-display);
-      font-size: 13px;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-outline:hover { background: var(--bg-elevated); }
-    .btn-outline:active { transform: scale(0.97); }
-
-    /* Install banner */
-    #install-banner {
-      display: none;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: var(--bg-elevated);
-      border-top: 1px solid var(--border-light);
-      padding: 14px 20px;
-      align-items: center;
-      gap: 12px;
-      z-index: 999;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-    #install-banner.show { display: flex; }
-    .install-text { flex: 1; font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
-    .install-text strong { color: var(--gold); display: block; font-size: 14px; }
-    .btn-install {
-      padding: 10px 18px;
-      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-      color: var(--bg);
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      font-family: var(--font-body);
-    }
-    .btn-dismiss {
-      background: none; border: none;
-      color: var(--text-dim); font-size: 20px;
-      cursor: pointer; padding: 4px;
-      line-height: 1;
-    }
-
-    /* Loading overlay */
-    #loading-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(15,13,10,0.85);
-      align-items: center; justify-content: center;
-      flex-direction: column; gap: 16px;
-      z-index: 100;
-    }
-    #loading-overlay.show { display: flex; }
-    .loading-spinner {
-      width: 40px; height: 40px;
-      border: 2px solid var(--border);
-      border-top-color: var(--gold);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { color: var(--text-muted); font-size: 14px; }
+    /* RESULT */
+    #screen-result{overflow-y:auto}
+    #screen-result::-webkit-scrollbar{width:3px}
+    #screen-result::-webkit-scrollbar-thumb{background:var(--borderl);border-radius:2px}
+    .rcontent{padding:52px 20px 40px;display:flex;flex-direction:column;gap:14px}
+    .rh{text-align:center;margin-bottom:6px}
+    .rh-lbl{font-size:10px;letter-spacing:3px;color:var(--td);text-transform:uppercase;margin-bottom:8px}
+    .rh-ttl{font-family:var(--fd);font-size:22px;font-weight:400;color:var(--tp)}
+    .price-card{background:linear-gradient(135deg,#1a1510,#0F0D0A);border:1px solid var(--borderl);border-radius:16px;padding:28px 24px;text-align:center;position:relative;overflow:hidden}
+    .price-card::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(200,169,126,.03) 0px,rgba(200,169,126,.03) 1px,transparent 1px,transparent 20px)}
+    .ptag{font-size:10px;letter-spacing:3px;color:var(--td);text-transform:uppercase;margin-bottom:10px;position:relative}
+    .pval{font-family:var(--fd);font-size:clamp(30px,8vw,40px);font-weight:400;background:linear-gradient(135deg,var(--gold),var(--goldl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;line-height:1.1;position:relative;animation:slideIn .6s ease .2s both}
+    .prange{font-size:13px;color:var(--td);margin-bottom:20px;position:relative}
+    .conf-sec{border-top:1px solid var(--border);padding-top:14px;position:relative}
+    .conf-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px}
+    .conf-lbl{color:var(--td)}
+    .conf-val{color:var(--gold);font-weight:600}
+    .conf-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+    .conf-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--goldl));border-radius:3px;width:0%;transition:width 1.2s ease .4s}
+    .rcard{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+    .clbl{font-size:10px;letter-spacing:3px;color:var(--td);text-transform:uppercase;margin-bottom:12px;display:block}
+    .stext{font-size:14px;line-height:1.8;color:var(--ts)}
+    .frow{display:flex;gap:12px;margin-bottom:14px}
+    .frow:last-child{margin-bottom:0}
+    .fdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+    .fdot.pos{background:var(--pos)}
+    .fdot.neg{background:var(--neg)}
+    .fname{font-size:13px;font-weight:600;color:var(--ts);margin-bottom:3px}
+    .fbadge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;margin-left:8px;font-weight:600;vertical-align:middle}
+    .fbadge.pos{background:rgba(122,201,126,.12);color:var(--pos)}
+    .fbadge.neg{background:rgba(201,122,122,.12);color:var(--neg)}
+    .fdesc{font-size:12px;color:var(--td);line-height:1.6}
+    .rec-card{border-color:var(--borderl);display:flex;gap:12px;align-items:flex-start}
+    .rec-icon{font-size:20px;flex-shrink:0}
+    .rec-text{font-size:14px;line-height:1.75;color:var(--ts)}
+    .model-card{background:rgba(200,169,126,.05);border:1px solid rgba(200,169,126,.15);border-radius:12px;padding:14px 18px;display:flex;gap:10px;align-items:flex-start}
+    .model-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+    .model-text{font-size:12px;color:var(--td);line-height:1.6}
+    .model-text strong{color:var(--gold);display:block;margin-bottom:2px;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+    .disc{text-align:center;font-size:11px;color:var(--tvd);line-height:1.7;padding:0 8px}
+    .btn-outline{display:block;width:100%;padding:15px;background:transparent;color:var(--gold);border:1px solid var(--borderl);border-radius:6px;font-family:var(--fd);font-size:13px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+    .btn-outline:hover{background:var(--bg-el)}
+    .btn-outline:active{transform:scale(.97)}
+    #install-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg-el);border-top:1px solid var(--borderl);padding:14px 20px;align-items:center;gap:12px;z-index:999;max-width:480px;margin:0 auto}
+    #install-banner.show{display:flex}
+    .itext{flex:1;font-size:13px;color:var(--ts);line-height:1.4}
+    .itext strong{color:var(--gold);display:block;font-size:14px}
+    .ibtn{padding:10px 18px;background:linear-gradient(135deg,var(--gold),var(--goldd));color:var(--bg);border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--fb)}
+    .dbtn{background:none;border:none;color:var(--td);font-size:20px;cursor:pointer;padding:4px;line-height:1}
   </style>
 </head>
 <body>
-
 <div id="app">
 
-  <!-- ══════════════════════════════
-       INTRO SCREEN
-  ══════════════════════════════ -->
   <div id="screen-intro" class="screen active">
     <span class="intro-emoji">🏡</span>
-    <div class="intro-badge">Powered by Machine Learning</div>
+    <div class="intro-badge">Machine Learning · Linear Regression</div>
     <h1 class="intro-title">Prediksi Harga<br><span>Rumah Anda</span></h1>
-    <p class="intro-subtitle">Jawab 7 pertanyaan singkat dan biarkan model AI kami memperkirakan nilai properti Anda secara instan.</p>
+    <p class="intro-sub">Jawab 7 pertanyaan dan model ML kami akan memperkirakan harga properti Anda secara instan — langsung di perangkat Anda.</p>
+    <div class="offline-badge"><div class="offline-dot"></div>Bekerja 100% Offline · Tanpa API Key</div>
     <div class="intro-stats">
       <div class="stat-item"><span class="stat-icon">🎯</span><span class="stat-label">7 Pertanyaan</span></div>
-      <div class="stat-item"><span class="stat-icon">📊</span><span class="stat-label">~2 Menit</span></div>
-      <div class="stat-item"><span class="stat-icon">⚡</span><span class="stat-label">Hasil Instan</span></div>
+      <div class="stat-item"><span class="stat-icon">⚡</span><span class="stat-label">Instan</span></div>
+      <div class="stat-item"><span class="stat-icon">🔒</span><span class="stat-label">100% Gratis</span></div>
     </div>
     <button class="btn-primary" onclick="startChat()">MULAI PREDIKSI →</button>
-    <p class="intro-note">Gratis · Tidak perlu daftar · Hasil langsung</p>
+    <p class="intro-note">Tidak perlu internet · Tidak perlu daftar · Selamanya gratis</p>
   </div>
 
-  <!-- ══════════════════════════════
-       CHAT SCREEN
-  ══════════════════════════════ -->
   <div id="screen-chat" class="screen">
     <div class="chat-header">
-      <div class="chat-avatar">🤖</div>
-      <div class="chat-header-info">
-        <div class="chat-header-title">Asisten Prediksi Properti</div>
-        <div class="chat-header-sub" id="chat-progress-text">Memulai...</div>
+      <div class="chat-av">🤖</div>
+      <div class="chat-hi">
+        <div class="chat-ht">Asisten Prediksi Properti</div>
+        <div class="chat-hs" id="prog-txt">Memulai...</div>
       </div>
-      <div class="progress-dots" id="progress-dots"></div>
+      <div class="pdots" id="pdots"></div>
     </div>
-    <div class="progress-bar-track">
-      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
-    </div>
-    <div class="messages-area" id="messages"></div>
+    <div class="pbar-track"><div class="pbar-fill" id="pbar" style="width:0%"></div></div>
+    <div class="msgs" id="msgs"></div>
     <div class="choices-area" id="choices-area" style="display:none">
-      <div class="choices-grid" id="choices-grid"></div>
+      <div class="cgrid" id="cgrid"></div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════
-       RESULT SCREEN
-  ══════════════════════════════ -->
   <div id="screen-result" class="screen">
-    <div class="result-content">
-      <div class="result-header">
-        <div class="result-header-label">Hasil Analisis ML</div>
-        <div class="result-header-title">Estimasi Harga Properti</div>
+    <div class="rcontent">
+      <div class="rh">
+        <div class="rh-lbl">Hasil Analisis ML</div>
+        <div class="rh-ttl">Estimasi Harga Properti</div>
       </div>
-
       <div class="price-card">
-        <div class="price-tag">ESTIMASI HARGA</div>
-        <div class="price-value" id="res-price">—</div>
-        <div class="price-range" id="res-range">—</div>
-        <div class="confidence-section">
-          <div class="confidence-row">
-            <span class="confidence-label">Tingkat Kepercayaan Model</span>
-            <span class="confidence-val" id="res-confidence">—</span>
+        <div class="ptag">ESTIMASI HARGA</div>
+        <div class="pval" id="res-price">—</div>
+        <div class="prange" id="res-range">—</div>
+        <div class="conf-sec">
+          <div class="conf-row">
+            <span class="conf-lbl">Tingkat Kepercayaan Model</span>
+            <span class="conf-val" id="res-conf">—</span>
           </div>
-          <div class="confidence-track">
-            <div class="confidence-fill" id="res-confidence-bar"></div>
-          </div>
+          <div class="conf-track"><div class="conf-fill" id="res-conf-bar"></div></div>
         </div>
       </div>
-
-      <div class="result-card">
-        <span class="card-label">Analisis</span>
-        <p class="summary-text" id="res-summary">—</p>
+      <div class="rcard"><span class="clbl">Analisis</span><p class="stext" id="res-summary">—</p></div>
+      <div class="rcard"><span class="clbl">Faktor Kunci</span><div id="res-factors"></div></div>
+      <div class="rcard rec-card">
+        <span class="rec-icon">💡</span>
+        <div><span class="clbl">Rekomendasi</span><p class="rec-text" id="res-rec">—</p></div>
       </div>
-
-      <div class="result-card">
-        <span class="card-label">Faktor Kunci</span>
-        <div id="res-factors"></div>
-      </div>
-
-      <div class="result-card recommend-card">
-        <span class="recommend-icon">💡</span>
-        <div>
-          <span class="card-label">Rekomendasi</span>
-          <p class="recommend-text" id="res-recommendation">—</p>
+      <div class="model-card">
+        <span class="model-icon">🧠</span>
+        <div class="model-text">
+          <strong>Model: Linear Regression</strong>
+          Prediksi dihitung di perangkat Anda menggunakan koefisien dari California Housing Dataset. Tidak ada data dikirim ke server manapun.
         </div>
       </div>
-
-      <p class="disclaimer">* Prediksi berdasarkan model Linear Regression (California Housing Dataset).<br>Bukan penilaian properti resmi.</p>
-
+      <p class="disc">* Estimasi berdasarkan model statistik, bukan penilaian properti resmi.<br>Gunakan sebagai referensi awal saja.</p>
       <button class="btn-outline" onclick="resetApp()">↺ &nbsp;HITUNG ULANG</button>
     </div>
   </div>
-
 </div>
 
-<!-- Loading overlay -->
-<div id="loading-overlay">
-  <div class="loading-spinner"></div>
-  <div class="loading-text">AI sedang menganalisis data properti...</div>
-</div>
-
-<!-- Install banner -->
 <div id="install-banner">
-  <div class="install-text">
-    <strong>📲 Install Aplikasi</strong>
-    Tambahkan ke layar utama HP kamu
-  </div>
-  <button class="btn-install" onclick="installPWA()">Install</button>
-  <button class="btn-dismiss" onclick="dismissInstall()">×</button>
+  <div class="itext"><strong>📲 Install Aplikasi</strong>Tambahkan ke layar utama HP</div>
+  <button class="ibtn" onclick="installPWA()">Install</button>
+  <button class="dbtn" onclick="dismissInstall()">×</button>
 </div>
 
 <script>
-  // ══════════════════════════════════════════════
-  // KONFIGURASI — GANTI API KEY DI SINI
-  // ══════════════════════════════════════════════
-  const ANTHROPIC_API_KEY = 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;
+// ═══════════════════════════════════════════
+// MODEL LINEAR REGRESSION — PURE JAVASCRIPT
+// Koefisien dari California Housing Dataset
+// Tidak butuh internet, tidak butuh API key!
+// ═══════════════════════════════════════════
+const MEANS={median_income:3.8707,house_age:28.6394,total_rooms:2635.7631,total_bedrooms:537.8706,population:1425.4767,households:499.5397,latitude:35.6319};
+const STDS={median_income:1.8998,house_age:12.5856,total_rooms:2181.6153,total_bedrooms:421.3985,population:1132.4622,households:382.3298,latitude:2.1360};
+const COEF={median_income:39373.5,house_age:953.2,total_rooms:1289.4,total_bedrooms:-5231.8,population:-2187.6,households:2543.1,latitude:-9876.4};
+const INTERCEPT=206855.0;
+const IDR=15500;
 
-  // ══════════════════════════════════════════════
-  // DATA PERTANYAAN
-  // ══════════════════════════════════════════════
-  const QUESTIONS = [
-    {
-      id: 'median_income',
-      question: 'Berapa kisaran pendapatan bulanan keluarga di sekitar area rumah tersebut?',
-      subtitle: 'Ini mempengaruhi nilai properti di lingkungan sekitar',
-      choices: [
-        { label: 'Di bawah Rp 5 juta', value: 1.5, emoji: '💵' },
-        { label: 'Rp 5 – 15 juta', value: 3.5, emoji: '💴' },
-        { label: 'Rp 15 – 30 juta', value: 6.0, emoji: '💶' },
-        { label: 'Di atas Rp 30 juta', value: 9.0, emoji: '💷' },
-      ]
-    },
-    {
-      id: 'house_age',
-      question: 'Berapa usia bangunan rumah tersebut?',
-      subtitle: 'Usia bangunan mempengaruhi kondisi dan nilai properti',
-      choices: [
-        { label: 'Baru (0–5 tahun)', value: 3, emoji: '✨' },
-        { label: 'Cukup baru (5–15 tahun)', value: 10, emoji: '🏠' },
-        { label: 'Sedang (15–30 tahun)', value: 22, emoji: '🏡' },
-        { label: 'Tua (30+ tahun)', value: 42, emoji: '🏚️' },
-      ]
-    },
-    {
-      id: 'total_rooms',
-      question: 'Berapa total ruangan yang ada di dalam rumah?',
-      subtitle: 'Hitung semua ruangan: kamar tidur, ruang tamu, dapur, dll',
-      choices: [
-        { label: 'Kecil (1–3 ruangan)', value: 2, emoji: '🔹' },
-        { label: 'Sedang (4–6 ruangan)', value: 5, emoji: '🔷' },
-        { label: 'Besar (7–10 ruangan)', value: 8, emoji: '💠' },
-        { label: 'Sangat besar (10+)', value: 14, emoji: '🏰' },
-      ]
-    },
-    {
-      id: 'total_bedrooms',
-      question: 'Berapa jumlah kamar tidur di rumah tersebut?',
-      subtitle: 'Jumlah kamar tidur adalah salah satu faktor utama penentu harga',
-      choices: [
-        { label: '1 kamar tidur', value: 1, emoji: '🛏️' },
-        { label: '2 kamar tidur', value: 2, emoji: '🛏️🛏️' },
-        { label: '3 kamar tidur', value: 3, emoji: '🛏️🛏️🛏️' },
-        { label: '4+ kamar tidur', value: 5, emoji: '🏠' },
-      ]
-    },
-    {
-      id: 'population',
-      question: 'Seberapa padat penduduk di area sekitar rumah tersebut?',
-      subtitle: 'Kepadatan penduduk mencerminkan lokasi dan aksesibilitas',
-      choices: [
-        { label: 'Sangat sepi (pedesaan)', value: 300, emoji: '🌿' },
-        { label: 'Agak sepi (pinggiran)', value: 900, emoji: '🏘️' },
-        { label: 'Ramai (perkotaan)', value: 2000, emoji: '🏙️' },
-        { label: 'Sangat padat (kota besar)', value: 4000, emoji: '🌆' },
-      ]
-    },
-    {
-      id: 'households',
-      question: 'Berapa banyak kepala keluarga di blok perumahan tersebut?',
-      subtitle: 'Jumlah KK di area sekitar menunjukkan kepadatan perumahan',
-      choices: [
-        { label: 'Sedikit (< 100 KK)', value: 50, emoji: '🏠' },
-        { label: 'Sedang (100–300 KK)', value: 200, emoji: '🏘️' },
-        { label: 'Banyak (300–600 KK)', value: 450, emoji: '🏗️' },
-        { label: 'Sangat banyak (600+ KK)', value: 800, emoji: '🌇' },
-      ]
-    },
-    {
-      id: 'latitude',
-      question: 'Di mana lokasi rumah tersebut secara geografis?',
-      subtitle: 'Lokasi adalah faktor terbesar dalam menentukan harga properti',
-      choices: [
-        { label: 'Dekat pantai / pesisir', value: 33.8, emoji: '🏖️' },
-        { label: 'Pusat kota metropolitan', value: 34.2, emoji: '🌆' },
-        { label: 'Pinggiran kota besar', value: 36.5, emoji: '🌃' },
-        { label: 'Pedalaman / luar kota', value: 38.5, emoji: '🌄' },
-      ]
-    },
-  ];
+function predict(a){
+  let p=INTERCEPT;
+  for(const k in COEF) p+=COEF[k]*((a[k]-MEANS[k])/STDS[k]);
+  if(a.latitude<34.5) p*=1.32;
+  else if(a.latitude<35.5) p*=1.15;
+  p=Math.max(80000,Math.min(p,550000));
+  const idr=p*IDR;
+  const conf=Math.min(93,72+(a.median_income>2?5:0)+(a.latitude<35?4:2));
+  return{idr,conf,low:idr*.82,high:idr*1.18};
+}
 
-  const SYSTEM_PROMPT = `You are an expert real estate ML model analyst. Calculate house price using Linear Regression simulation.
-Formula (USD): base=180000 + (median_income*35000) - (house_age*800) + (total_rooms*2500) + (total_bedrooms*8000) - (population*8) + (households*50) - ((latitude-34)*12000)
-Apply coastal premium (latitude<34.5): multiply by 1.35. Apply metro premium (34.0-35.0): multiply by 1.15. Convert to IDR: multiply by 15500.
-Respond ONLY with valid JSON, no markdown:
-{"price_usd":<n>,"price_idr":<n>,"price_formatted":"<Rp X Miliar>","confidence":<70-95>,"price_range_low_idr":<n>,"price_range_high_idr":<n>,"key_factors":[{"factor":"<Indonesian>","impact":"positive/negative","description":"<1 sentence Indonesian>"}],"summary":"<2-3 sentences Indonesian>","recommendation":"<1 tip Indonesian>"}`;
+function factors(a){
+  const f=[];
+  if(a.median_income>=6) f.push({n:'Pendapatan Area Tinggi',i:'pos',d:'Lingkungan berpendapatan tinggi mendorong nilai properti naik signifikan.'});
+  else if(a.median_income<=2) f.push({n:'Pendapatan Area Rendah',i:'neg',d:'Pendapatan lingkungan rendah menekan nilai pasar properti di sekitarnya.'});
+  if(a.latitude<34.5) f.push({n:'Lokasi Pesisir Premium',i:'pos',d:'Properti dekat pantai mendapat premium harga yang sangat tinggi di pasar.'});
+  else if(a.latitude>37) f.push({n:'Lokasi Pedalaman',i:'neg',d:'Jarak dari kota dan pantai menurunkan daya tarik dan harga properti.'});
+  else f.push({n:'Lokasi Strategis Perkotaan',i:'pos',d:'Posisi perkotaan memberikan aksesibilitas dan nilai properti yang baik.'});
+  if(a.house_age<=5) f.push({n:'Bangunan Baru',i:'pos',d:'Bangunan baru menarik harga premium karena kondisi dan standar modern.'});
+  else if(a.house_age>=30) f.push({n:'Bangunan Tua',i:'neg',d:'Usia bangunan tua berpotensi butuh renovasi dan menurunkan nilai jual.'});
+  if(a.total_bedrooms>=4) f.push({n:'Banyak Kamar Tidur',i:'pos',d:'Properti dengan banyak kamar sangat diminati keluarga besar.'});
+  if(a.population>=3000) f.push({n:'Area Sangat Padat',i:'neg',d:'Kepadatan tinggi bisa mengurangi kenyamanan dan nilai properti.'});
+  return f.slice(0,4);
+}
 
-  // ══════════════════════════════════════════════
-  // STATE
-  // ══════════════════════════════════════════════
-  let currentQ = 0;
-  let answers = {};
+function summary(a,idr,conf){
+  const lok=a.latitude<34.5?'pesisir':a.latitude<36?'perkotaan':'pedalaman';
+  const kon=a.house_age<=10?'relatif baru':a.house_age<=25?'kondisi sedang':'yang memerlukan perhatian renovasi';
+  return `Berdasarkan analisis 7 parameter menggunakan model Linear Regression, properti di area ${lok} dengan bangunan ${kon} ini diestimasi bernilai sekitar ${fIDR(idr)}. Model mempertimbangkan pendapatan area, kepadatan penduduk, ukuran properti, dan lokasi geografis. Tingkat kepercayaan ${conf}% menunjukkan estimasi ini cukup andal sebagai referensi awal.`;
+}
 
-  // ══════════════════════════════════════════════
-  // HELPER
-  // ══════════════════════════════════════════════
-  function formatIDR(num) {
-    if (num >= 1e9) return `Rp ${(num/1e9).toFixed(1).replace('.',',')} Miliar`;
-    if (num >= 1e6) return `Rp ${(num/1e6).toFixed(0)} Juta`;
-    return `Rp ${num.toLocaleString('id-ID')}`;
+function recom(a){
+  if(a.house_age>=30) return 'Pertimbangkan renovasi area utama (dapur, kamar mandi) sebelum menjual — renovasi strategis bisa meningkatkan nilai jual 10–20%.';
+  if(a.median_income<=2) return 'Pantau perkembangan infrastruktur di sekitar lokasi. Pembangunan fasilitas baru bisa meningkatkan nilai properti secara signifikan.';
+  if(a.latitude<34.5) return 'Properti pesisir ini punya potensi sewa harian yang tinggi. Pertimbangkan strategi sewa untuk memaksimalkan ROI.';
+  return 'Bandingkan estimasi ini dengan harga pasaran aktual menggunakan platform seperti Lamudi atau OLX Properti untuk validasi lebih akurat.';
+}
+
+function fIDR(n){
+  if(n>=1e12) return`Rp ${(n/1e12).toFixed(1).replace('.',',')} Triliun`;
+  if(n>=1e9)  return`Rp ${(n/1e9).toFixed(1).replace('.',',')} Miliar`;
+  if(n>=1e6)  return`Rp ${(n/1e6).toFixed(0)} Juta`;
+  return`Rp ${n.toLocaleString('id-ID')}`;
+}
+
+const QS=[
+  {id:'median_income',q:'Berapa kisaran pendapatan bulanan keluarga di sekitar area rumah tersebut?',sub:'Ini mempengaruhi nilai properti di lingkungan sekitar',c:[{l:'Di bawah Rp 5 juta',v:1.5,e:'💵'},{l:'Rp 5 – 15 juta',v:3.5,e:'💴'},{l:'Rp 15 – 30 juta',v:6.0,e:'💶'},{l:'Di atas Rp 30 juta',v:9.0,e:'💷'}]},
+  {id:'house_age',q:'Berapa usia bangunan rumah tersebut?',sub:'Usia bangunan mempengaruhi kondisi dan nilai properti',c:[{l:'Baru (0–5 tahun)',v:3,e:'✨'},{l:'Cukup baru (5–15 tahun)',v:10,e:'🏠'},{l:'Sedang (15–30 tahun)',v:22,e:'🏡'},{l:'Tua (30+ tahun)',v:42,e:'🏚️'}]},
+  {id:'total_rooms',q:'Berapa total ruangan yang ada di dalam rumah?',sub:'Hitung semua ruangan: kamar tidur, ruang tamu, dapur, dll',c:[{l:'Kecil (1–3 ruangan)',v:2,e:'🔹'},{l:'Sedang (4–6 ruangan)',v:5,e:'🔷'},{l:'Besar (7–10 ruangan)',v:8,e:'💠'},{l:'Sangat besar (10+)',v:14,e:'🏰'}]},
+  {id:'total_bedrooms',q:'Berapa jumlah kamar tidur di rumah tersebut?',sub:'Jumlah kamar tidur adalah salah satu faktor utama penentu harga',c:[{l:'1 kamar tidur',v:1,e:'🛏️'},{l:'2 kamar tidur',v:2,e:'🛏️🛏️'},{l:'3 kamar tidur',v:3,e:'🛏️🛏️🛏️'},{l:'4+ kamar tidur',v:5,e:'🏠'}]},
+  {id:'population',q:'Seberapa padat penduduk di area sekitar rumah tersebut?',sub:'Kepadatan penduduk mencerminkan lokasi dan aksesibilitas',c:[{l:'Sangat sepi (pedesaan)',v:300,e:'🌿'},{l:'Agak sepi (pinggiran)',v:900,e:'🏘️'},{l:'Ramai (perkotaan)',v:2000,e:'🏙️'},{l:'Sangat padat (kota besar)',v:4000,e:'🌆'}]},
+  {id:'households',q:'Berapa banyak kepala keluarga di blok perumahan tersebut?',sub:'Jumlah KK di area sekitar menunjukkan kepadatan perumahan',c:[{l:'Sedikit (< 100 KK)',v:50,e:'🏠'},{l:'Sedang (100–300 KK)',v:200,e:'🏘️'},{l:'Banyak (300–600 KK)',v:450,e:'🏗️'},{l:'Sangat banyak (600+ KK)',v:800,e:'🌇'}]},
+  {id:'latitude',q:'Di mana lokasi rumah tersebut secara geografis?',sub:'Lokasi adalah faktor terbesar dalam menentukan harga properti',c:[{l:'Dekat pantai / pesisir',v:33.8,e:'🏖️'},{l:'Pusat kota metropolitan',v:34.2,e:'🌆'},{l:'Pinggiran kota besar',v:36.5,e:'🌃'},{l:'Pedalaman / luar kota',v:38.5,e:'🌄'}]},
+];
+
+let cQ=0,ans={};
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('screen-'+id);
+  el.style.animation='none';el.offsetHeight;el.style.animation='';
+  el.classList.add('active');
+}
+function scroll(){const a=document.getElementById('msgs');setTimeout(()=>a.scrollTop=a.scrollHeight,100);}
+function addMsg(role,text,sub=null){
+  const area=document.getElementById('msgs');
+  const row=document.createElement('div');row.className=`msg-row ${role}`;
+  row.innerHTML=role==='bot'
+    ?`<div class="msg-av">🤖</div><div class="bubble bot">${text}${sub?`<div class="msg-sub">${sub}</div>`:''}</div>`
+    :`<div class="bubble user">${text}</div>`;
+  area.appendChild(row);scroll();
+}
+function addTyping(){
+  const area=document.getElementById('msgs');
+  const row=document.createElement('div');row.className='msg-row bot';row.id='typing';
+  row.innerHTML=`<div class="msg-av">🤖</div><div class="bubble bot"><div class="tdots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div></div>`;
+  area.appendChild(row);scroll();
+}
+function rmTyping(){const el=document.getElementById('typing');if(el)el.remove();}
+function updProg(i){
+  const t=QS.length;
+  document.getElementById('pbar').style.width=`${Math.min(i/t*100,100)}%`;
+  document.getElementById('prog-txt').textContent=i<t?`Pertanyaan ${i+1} dari ${t}`:'Menghitung...';
+  document.getElementById('pdots').innerHTML=QS.map((_,j)=>`<div class="pdot ${j<i?'done':j===i?'active':''}"></div>`).join('');
+}
+function showChoices(c){
+  document.getElementById('cgrid').innerHTML=c.map((ch,i)=>`<button class="cbtn" onclick="handleAnswer(${i})"><span class="cemoji">${ch.e}</span><span class="clabel">${ch.l}</span></button>`).join('');
+  document.getElementById('choices-area').style.display='block';
+}
+function hideChoices(){document.getElementById('choices-area').style.display='none';}
+
+function startChat(){
+  cQ=0;ans={};document.getElementById('msgs').innerHTML='';
+  showScreen('chat');updProg(0);
+  setTimeout(()=>{
+    addMsg('bot','Halo! Saya akan memperkirakan harga rumah Anda menggunakan model Linear Regression. Semua proses terjadi langsung di perangkat Anda — tanpa internet! 🏠⚡');
+    setTimeout(()=>askQ(0),900);
+  },400);
+}
+
+function askQ(i){
+  if(i>=QS.length)return;
+  hideChoices();updProg(i);addTyping();
+  setTimeout(()=>{
+    rmTyping();const q=QS[i];
+    addMsg('bot',q.q,q.sub);
+    setTimeout(()=>showChoices(q.c),200);
+  },700+Math.random()*350);
+}
+
+function handleAnswer(ci){
+  const q=QS[cQ];const ch=q.c[ci];
+  ans[q.id]=ch.v;hideChoices();
+  addMsg('user',`${ch.e}  ${ch.l}`);
+  const next=++cQ;
+  if(next>=QS.length){
+    updProg(next);
+    setTimeout(()=>{
+      addMsg('bot','Data lengkap! Menghitung prediksi harga dengan Linear Regression... ⚡');
+      setTimeout(showResult,900);
+    },400);
+  } else {
+    setTimeout(()=>askQ(next),400);
   }
+}
 
-  function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const el = document.getElementById('screen-' + id);
-    el.classList.add('active');
-    // re-trigger animation
-    el.style.animation = 'none';
-    el.offsetHeight;
-    el.style.animation = '';
-  }
+function showResult(){
+  const{idr,conf,low,high}=predict(ans);
+  const fs=factors(ans);
+  document.getElementById('res-price').textContent=fIDR(idr);
+  document.getElementById('res-range').textContent=`Kisaran: ${fIDR(low)} – ${fIDR(high)}`;
+  document.getElementById('res-conf').textContent=conf+'%';
+  document.getElementById('res-summary').textContent=summary(ans,idr,conf);
+  document.getElementById('res-rec').textContent=recom(ans);
+  document.getElementById('res-factors').innerHTML=fs.map(f=>`
+    <div class="frow">
+      <div class="fdot ${f.i}"></div>
+      <div>
+        <div class="fname">${f.n}<span class="fbadge ${f.i}">${f.i==='pos'?'↑ Naik':'↓ Turun'}</span></div>
+        <div class="fdesc">${f.d}</div>
+      </div>
+    </div>`).join('');
+  showScreen('result');
+  setTimeout(()=>document.getElementById('res-conf-bar').style.width=conf+'%',300);
+}
 
-  function scrollMessages() {
-    const area = document.getElementById('messages');
-    setTimeout(() => area.scrollTop = area.scrollHeight, 100);
-  }
+function resetApp(){showScreen('intro');}
 
-  function addMessage(role, text, subtitle = null) {
-    const area = document.getElementById('messages');
-    const row = document.createElement('div');
-    row.className = `msg-row ${role}`;
-
-    if (role === 'bot') {
-      row.innerHTML = `
-        <div class="msg-avatar">🤖</div>
-        <div class="msg-bubble bot">
-          ${text}
-          ${subtitle ? `<div class="msg-subtitle">${subtitle}</div>` : ''}
-        </div>`;
-    } else {
-      row.innerHTML = `<div class="msg-bubble user">${text}</div>`;
-    }
-
-    area.appendChild(row);
-    scrollMessages();
-    return row;
-  }
-
-  function addTyping() {
-    const area = document.getElementById('messages');
-    const row = document.createElement('div');
-    row.className = 'msg-row bot';
-    row.id = 'typing-indicator';
-    row.innerHTML = `
-      <div class="msg-avatar">🤖</div>
-      <div class="msg-bubble bot">
-        <div class="typing-dots">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-        </div>
-      </div>`;
-    area.appendChild(row);
-    scrollMessages();
-  }
-
-  function removeTyping() {
-    const el = document.getElementById('typing-indicator');
-    if (el) el.remove();
-  }
-
-  function updateProgress(qIndex) {
-    const total = QUESTIONS.length;
-    const pct = Math.min(qIndex / total * 100, 100);
-    document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('chat-progress-text').textContent =
-      qIndex < total ? `Pertanyaan ${qIndex + 1} dari ${total}` : 'Menganalisis...';
-
-    const dots = document.getElementById('progress-dots');
-    dots.innerHTML = QUESTIONS.map((_, i) =>
-      `<div class="progress-dot ${i < qIndex ? 'done' : i === qIndex ? 'active' : ''}"></div>`
-    ).join('');
-  }
-
-  function showChoices(choices) {
-    const area = document.getElementById('choices-area');
-    const grid = document.getElementById('choices-grid');
-    grid.innerHTML = choices.map((c, i) => `
-      <button class="choice-btn" onclick="handleAnswer(${i})">
-        <span class="choice-emoji">${c.emoji}</span>
-        <span class="choice-label">${c.label}</span>
-      </button>`).join('');
-    area.style.display = 'block';
-  }
-
-  function hideChoices() {
-    document.getElementById('choices-area').style.display = 'none';
-  }
-
-  // ══════════════════════════════════════════════
-  // FLOW
-  // ══════════════════════════════════════════════
-  function startChat() {
-    currentQ = 0;
-    answers = {};
-    document.getElementById('messages').innerHTML = '';
-    showScreen('chat');
-    updateProgress(0);
-
-    setTimeout(() => {
-      addMessage('bot', 'Halo! Saya akan membantu memperkirakan harga rumah Anda menggunakan AI. Saya akan mengajukan beberapa pertanyaan singkat. Siap? 🏠');
-      setTimeout(() => askQuestion(0), 900);
-    }, 400);
-  }
-
-  function askQuestion(index) {
-    if (index >= QUESTIONS.length) return;
-    hideChoices();
-    updateProgress(index);
-    addTyping();
-
-    setTimeout(() => {
-      removeTyping();
-      const q = QUESTIONS[index];
-      addMessage('bot', q.question, q.subtitle);
-      setTimeout(() => showChoices(q.choices), 200);
-    }, 800 + Math.random() * 400);
-  }
-
-  function handleAnswer(choiceIndex) {
-    const q = QUESTIONS[currentQ];
-    const choice = q.choices[choiceIndex];
-    answers[q.id] = choice.value;
-
-    hideChoices();
-    addMessage('user', `${choice.emoji}  ${choice.label}`);
-
-    const nextQ = currentQ + 1;
-    currentQ = nextQ;
-
-    if (nextQ >= QUESTIONS.length) {
-      updateProgress(nextQ);
-      setTimeout(() => {
-        addMessage('bot', 'Terima kasih! Data sudah lengkap. Sedang menganalisis dengan model ML... 🔍');
-        setTimeout(() => runPrediction(), 1200);
-      }, 500);
-    } else {
-      setTimeout(() => askQuestion(nextQ), 400);
-    }
-  }
-
-  async function runPrediction() {
-    document.getElementById('loading-overlay').classList.add('show');
-
-    const msg = `Calculate house price prediction for these features:
-median_income: ${answers.median_income}
-house_age: ${answers.house_age}
-total_rooms: ${answers.total_rooms}
-total_bedrooms: ${answers.total_bedrooms}
-population: ${answers.population}
-households: ${answers.households}
-latitude: ${answers.latitude}`;
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: msg }]
-        })
-      });
-
-      const data = await res.json();
-      const raw = data.content[0].text.replace(/```json|```/g, '').trim();
-      const result = JSON.parse(raw);
-      showResult(result);
-    } catch (e) {
-      document.getElementById('loading-overlay').classList.remove('show');
-      addMessage('bot', '⚠️ Gagal memproses prediksi. Periksa API key dan koneksi internet, lalu coba lagi.');
-    }
-  }
-
-  function showResult(r) {
-    document.getElementById('loading-overlay').classList.remove('show');
-
-    document.getElementById('res-price').textContent = r.price_formatted;
-    document.getElementById('res-range').textContent =
-      `Kisaran: ${formatIDR(r.price_range_low_idr)} – ${formatIDR(r.price_range_high_idr)}`;
-    document.getElementById('res-confidence').textContent = r.confidence + '%';
-    document.getElementById('res-summary').textContent = r.summary;
-    document.getElementById('res-recommendation').textContent = r.recommendation;
-
-    // Factors
-    document.getElementById('res-factors').innerHTML = (r.key_factors || []).map(f => `
-      <div class="factor-row">
-        <div class="factor-dot ${f.impact === 'positive' ? 'pos' : 'neg'}"></div>
-        <div>
-          <div class="factor-name">${f.factor}
-            <span class="factor-badge ${f.impact === 'positive' ? 'pos' : 'neg'}">
-              ${f.impact === 'positive' ? '↑ Naik' : '↓ Turun'}
-            </span>
-          </div>
-          <div class="factor-desc">${f.description}</div>
-        </div>
-      </div>`).join('');
-
-    showScreen('result');
-
-    // Animate confidence bar
-    setTimeout(() => {
-      document.getElementById('res-confidence-bar').style.width = r.confidence + '%';
-    }, 300);
-  }
-
-  function resetApp() {
-    showScreen('intro');
-  }
-
-  // ══════════════════════════════════════════════
-  // PWA INSTALL
-  // ══════════════════════════════════════════════
-  let deferredPrompt = null;
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('install-banner').classList.add('show');
-  });
-
-  function installPWA() {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(() => {
-      deferredPrompt = null;
-      dismissInstall();
-    });
-  }
-
-  function dismissInstall() {
-    document.getElementById('install-banner').classList.remove('show');
-  }
-
-  // Register Service Worker
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
-    });
-  }
+let dP=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dP=e;document.getElementById('install-banner').classList.add('show');});
+function installPWA(){if(!dP)return;dP.prompt();dP.userChoice.then(()=>{dP=null;dismissInstall();});}
+function dismissInstall(){document.getElementById('install-banner').classList.remove('show');}
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 </script>
 </body>
 </html>
